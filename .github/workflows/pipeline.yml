@@ -1,0 +1,50 @@
+name: pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: impactajullya/api-devops
+
+jobs:
+  build:
+    name: Build (no push)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalando dependências
+        run: pip install -r requirements.txt
+
+      - name: Build do Docker
+        run: docker build -t api-devops .
+
+  test:
+    name: Teste
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalando dependências
+        run: pip install -r requirements.txt
+
+      - name: Build do Docker
+        run: docker build -t api-devops .
+
+      - name: Teste dentro do Docker
+        run: docker run --rm api-devops python -m unittest test_app -v
